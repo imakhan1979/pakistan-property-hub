@@ -14,16 +14,177 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      agents: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          phone: string | null
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          phone?: string | null
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          phone?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      lead_activities: {
+        Row: {
+          activity_type: string
+          agent_id: string | null
+          created_at: string
+          description: string
+          id: string
+          lead_id: string
+        }
+        Insert: {
+          activity_type: string
+          agent_id?: string | null
+          created_at?: string
+          description: string
+          id?: string
+          lead_id: string
+        }
+        Update: {
+          activity_type?: string
+          agent_id?: string | null
+          created_at?: string
+          description?: string
+          id?: string
+          lead_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_activities_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_activities_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leads: {
+        Row: {
+          assigned_agent_id: string | null
+          budget_flexible: boolean
+          budget_max: number | null
+          budget_min: number | null
+          created_at: string
+          email: string | null
+          id: string
+          intentions: string[]
+          interest_types: string[]
+          locations: string[]
+          mobile: string
+          name: string
+          notes: string | null
+          preferred_contact_time: string | null
+          source: string
+          status: string
+          updated_at: string
+          whatsapp_opt_in: boolean
+        }
+        Insert: {
+          assigned_agent_id?: string | null
+          budget_flexible?: boolean
+          budget_max?: number | null
+          budget_min?: number | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          intentions?: string[]
+          interest_types?: string[]
+          locations?: string[]
+          mobile: string
+          name: string
+          notes?: string | null
+          preferred_contact_time?: string | null
+          source?: string
+          status?: string
+          updated_at?: string
+          whatsapp_opt_in?: boolean
+        }
+        Update: {
+          assigned_agent_id?: string | null
+          budget_flexible?: boolean
+          budget_max?: number | null
+          budget_min?: number | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          intentions?: string[]
+          interest_types?: string[]
+          locations?: string[]
+          mobile?: string
+          name?: string
+          notes?: string | null
+          preferred_contact_time?: string | null
+          source?: string
+          status?: string
+          updated_at?: string
+          whatsapp_opt_in?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leads_assigned_agent_id_fkey"
+            columns: ["assigned_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_agent_id: { Args: never; Returns: string }
+      is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "agent"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +311,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "agent"],
+    },
   },
 } as const
