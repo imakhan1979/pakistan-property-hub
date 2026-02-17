@@ -11,6 +11,7 @@ import ListingDetail from "./pages/ListingDetail";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import AdminLogin from "./pages/admin/AdminLogin";
+import AdminSetup from "./pages/admin/AdminSetup";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminLeads from "./pages/admin/AdminLeads";
 import AdminInventory from "./pages/admin/AdminInventory";
@@ -35,6 +36,7 @@ const App = () => (
 
             {/* Auth */}
             <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin/setup" element={<AdminSetup />} />
 
             {/* Admin panel — protected */}
             <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />

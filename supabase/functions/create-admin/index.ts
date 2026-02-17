@@ -18,8 +18,20 @@ Deno.serve(async (req) => {
   try {
     const { email, password, name, phone, setupKey } = await req.json();
 
-    // Simple setup protection — require a setup key
-    if (setupKey !== Deno.env.get('ADMIN_SETUP_KEY')) {
+    const configuredKey = Deno.env.get('ADMIN_SETUP_KEY');
+
+    // Allow first-run setup when no admins exist yet
+    if (setupKey === 'FIRST_RUN') {
+      const { count } = await supabaseAdmin
+        .from('user_roles')
+        .select('id', { count: 'exact', head: true })
+        .eq('role', 'admin');
+      if ((count ?? 0) > 0) {
+        return new Response(JSON.stringify({ error: 'Admin already exists. Use your setup key.' }), {
+          status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+    } else if (!configuredKey || setupKey !== configuredKey) {
       return new Response(JSON.stringify({ error: 'Invalid setup key' }), {
         status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
