@@ -7,7 +7,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { useAuth } from '@/contexts/AuthContext';
 
 const NAV_ITEMS = [
   { label: 'Dashboard', href: '/admin', icon: LayoutDashboard },
@@ -22,7 +21,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const { authUser, signOut, isAdmin } = useAuth();
 
   const SidebarContent = () => (
     <div className="flex flex-col h-full">
@@ -75,10 +73,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <Building2 className="flex-shrink-0" style={{ height: 18, width: 18 }} />
           {!collapsed && <span>View Public Site</span>}
         </Link>
-        <button
-          onClick={async () => { await signOut(); navigate('/admin/login'); }}
-          className={cn('flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-sidebar-foreground hover:bg-destructive/20 hover:text-destructive transition-all w-full', collapsed && 'justify-center')}
-        >
+        <button className={cn('flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-sidebar-foreground hover:bg-red-900/30 hover:text-red-400 transition-all w-full', collapsed && 'justify-center')}>
           <LogOut style={{ height: 18, width: 18 }} />
           {!collapsed && <span>Logout</span>}
         </button>
@@ -138,11 +133,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </button>
             <div className="flex items-center gap-2 pl-2 border-l border-border">
               <div className="h-7 w-7 rounded-full bg-navy flex items-center justify-center text-primary-foreground text-xs font-bold">
-                {(authUser?.agentName ?? authUser?.user?.email ?? 'U').charAt(0).toUpperCase()}
+                S
               </div>
               <div className="hidden sm:block text-right">
-                <p className="text-xs font-medium text-foreground">{authUser?.agentName ?? authUser?.user?.email ?? 'User'}</p>
-                <p className="text-[10px] text-muted-foreground capitalize">{authUser?.role ?? 'agent'}</p>
+                <p className="text-xs font-medium text-foreground">Sara Sheikh</p>
+                <p className="text-[10px] text-muted-foreground">Admin</p>
               </div>
             </div>
           </div>
