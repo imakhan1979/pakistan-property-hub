@@ -33,7 +33,7 @@ export default function AdminLeads() {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [selected, setSelected] = useState<Lead | null>(null);
 
   const fetchLeads = async () => {
@@ -54,7 +54,7 @@ export default function AdminLeads() {
 
   const filtered = leads.filter(l => {
     const matchSearch = l.name.toLowerCase().includes(search.toLowerCase()) || l.mobile.includes(search);
-    const matchStatus = !statusFilter || l.status === statusFilter;
+    const matchStatus = statusFilter === 'all' || l.status === statusFilter;
     return matchSearch && matchStatus;
   });
 
@@ -99,7 +99,7 @@ export default function AdminLeads() {
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-40"><SelectValue placeholder="All Statuses" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Statuses</SelectItem>
+                <SelectItem value="all">All Statuses</SelectItem>
                 {PIPELINE_STAGES.map(s => <SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>)}
               </SelectContent>
             </Select>
@@ -110,7 +110,7 @@ export default function AdminLeads() {
             {PIPELINE_STAGES.map(stage => {
               const count = leads.filter(l => l.status === stage).length;
               return (
-                <button key={stage} onClick={() => setStatusFilter(statusFilter === stage ? '' : stage)}
+                <button key={stage} onClick={() => setStatusFilter(statusFilter === stage ? 'all' : stage)}
                   className={cn('flex-shrink-0 px-3 py-1.5 rounded-xl text-xs font-medium transition-all border capitalize',
                     statusFilter === stage ? 'border-navy bg-navy text-white' : 'border-border bg-card text-muted-foreground hover:border-navy/40')}>
                   {stage} <span className="ml-1 font-bold">{count}</span>
