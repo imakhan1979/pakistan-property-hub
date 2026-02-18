@@ -7,6 +7,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/hooks/useAuth';
 
 const NAV_ITEMS = [
   { label: 'Dashboard', href: '/admin', icon: LayoutDashboard },
@@ -21,6 +22,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const { user, signOut } = useAuth();
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/admin/login');
+  };
 
   const SidebarContent = () => (
     <div className="flex flex-col h-full">
@@ -31,7 +38,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
         {!collapsed && (
           <div>
-            <p className="font-display text-sm font-bold text-white">Elite Properties</p>
+            <p className="font-display text-sm font-bold text-white">Estate Bnk</p>
             <p className="text-[10px] text-gold/70 uppercase tracking-widest">Admin Panel</p>
           </div>
         )}
@@ -73,7 +80,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <Building2 className="flex-shrink-0" style={{ height: 18, width: 18 }} />
           {!collapsed && <span>View Public Site</span>}
         </Link>
-        <button className={cn('flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-sidebar-foreground hover:bg-red-900/30 hover:text-red-400 transition-all w-full', collapsed && 'justify-center')}>
+        <button onClick={handleLogout} className={cn('flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-sidebar-foreground hover:bg-destructive/20 hover:text-destructive transition-all w-full', collapsed && 'justify-center')}>
           <LogOut style={{ height: 18, width: 18 }} />
           {!collapsed && <span>Logout</span>}
         </button>
@@ -133,10 +140,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </button>
             <div className="flex items-center gap-2 pl-2 border-l border-border">
               <div className="h-7 w-7 rounded-full bg-navy flex items-center justify-center text-primary-foreground text-xs font-bold">
-                S
+                {user?.email?.charAt(0).toUpperCase() || 'A'}
               </div>
               <div className="hidden sm:block text-right">
-                <p className="text-xs font-medium text-foreground">Sara Sheikh</p>
+                <p className="text-xs font-medium text-foreground truncate max-w-28">{user?.email?.split('@')[0] || 'Admin'}</p>
                 <p className="text-[10px] text-muted-foreground">Admin</p>
               </div>
             </div>

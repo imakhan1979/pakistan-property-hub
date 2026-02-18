@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   MapPin, Bed, Bath, Square, Car, CheckCircle, Phone, MessageCircle,
-  ArrowLeft, Share2, Heart, ChevronLeft, ChevronRight, Eye, Calendar
+  ArrowLeft, Share2, Heart, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -13,15 +13,80 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import ChatWidget from '@/components/ChatWidget';
 import PropertyCard from '@/components/PropertyCard';
-import { properties, type Property } from '@/data/mockData';
+import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
+
+function mapProperty(p: any) {
+  return {
+    id: p.id, title: p.title, type: p.type, purpose: p.purpose,
+    price: p.price, priceLabel: p.price_label, area: p.area, areaUnit: p.area_unit,
+    bedrooms: p.bedrooms, bathrooms: p.bathrooms, parking: p.parking, furnished: p.furnished,
+    city: p.city, location: p.location, block: p.block, description: p.description || '',
+    images: p.images?.length ? p.images : ['https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80'],
+    features: p.features || [],
+    agent: { id: 'default', name: 'Estate Bnk Agent', phone: '+92-21-3580-0000', email: 'info@estatebnk.pk', role: 'agent' },
+    status: p.status, featured: p.featured, createdAt: p.created_at, whatsapp: p.whatsapp,
+  };
+}
 
 export default function ListingDetail() {
   const { id } = useParams();
-  const property = properties.find(p => p.id === id);
+  const [property, setProperty] = useState<ReturnType<typeof mapProperty> | null>(null);
+  const [similar, setSimilar] = useState<ReturnType<typeof mapProperty>[]>([]);
+  const [loading, setLoading] = useState(true);
   const [imgIdx, setImgIdx] = useState(0);
   const [formData, setFormData] = useState({ name: '', mobile: '', message: '' });
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!id) return;
+    supabase.from('properties').select('*').eq('id', id).single().then(({ data }) => {
+      if (data) {
+        const mapped = mapProperty(data);
+        setProperty(mapped);
+        // Fetch similar
+        supabase.from('properties').select('*').eq('type', data.type).eq('status', 'published').neq('id', id).limit(3)
+          .then(({ data: simData }) => setSimilar((simData || []).map(mapProperty)));
+      }
+      setLoading(false);
+    });
+  }, [id]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    await supabase.from('leads').insert({
+      name: formData.name,
+      mobile: formData.mobile,
+      notes: `${formData.message}\n\nInterested in: ${property?.title}`,
+      source: 'website',
+      status: 'new',
+      interest_types: [property?.type || ''],
+      intentions: [],
+      locations: [property?.location || ''],
+    });
+    setSubmitted(true);
+    setSubmitting(false);
+  };
+
+  const handleWhatsApp = () => {
+    if (!property) return;
+    const msg = encodeURIComponent(`Hi, I'm interested in: ${property.title} (${property.priceLabel}). Please share more details.`);
+    window.open(`https://wa.me/${(property.whatsapp || '923001234567').replace(/\D/g, '')}?text=${msg}`, '_blank');
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="container py-16">
+          <div className="h-96 bg-muted rounded-2xl animate-pulse" />
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   if (!property) {
     return (
@@ -38,23 +103,10 @@ export default function ListingDetail() {
     );
   }
 
-  const similar = properties.filter(p => p.id !== id && p.type === property.type && p.status === 'published').slice(0, 3);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitted(true);
-  };
-
-  const handleWhatsApp = () => {
-    const msg = encodeURIComponent(`Hi, I'm interested in: ${property.title} (${property.priceLabel}). Please share more details.`);
-    window.open(`https://wa.me/${(property.whatsapp || '').replace(/\D/g, '')}?text=${msg}`, '_blank');
-  };
-
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
 
-      {/* Breadcrumb */}
       <div className="bg-muted border-b border-border">
         <div className="container py-3 flex items-center gap-2 text-xs text-muted-foreground">
           <Link to="/" className="hover:text-navy">Home</Link>
@@ -66,42 +118,28 @@ export default function ListingDetail() {
       </div>
 
       <div className="container py-8">
-        {/* Back */}
         <Link to="/listings" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-navy transition-colors mb-6">
           <ArrowLeft className="h-4 w-4" /> Back to listings
         </Link>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left: Gallery + Details */}
           <div className="lg:col-span-2 space-y-6">
             {/* Gallery */}
             <div className="relative rounded-2xl overflow-hidden bg-muted">
-              <img
-                src={property.images[imgIdx]}
-                alt={property.title}
-                className="w-full h-72 md:h-96 object-cover"
-              />
+              <img src={property.images[imgIdx]} alt={property.title} className="w-full h-72 md:h-96 object-cover" />
               {property.images.length > 1 && (
                 <>
-                  <button
-                    onClick={() => setImgIdx((i) => (i - 1 + property.images.length) % property.images.length)}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/70 transition-colors"
-                  >
+                  <button onClick={() => setImgIdx(i => (i - 1 + property.images.length) % property.images.length)}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/70">
                     <ChevronLeft className="h-5 w-5" />
                   </button>
-                  <button
-                    onClick={() => setImgIdx((i) => (i + 1) % property.images.length)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/70 transition-colors"
-                  >
+                  <button onClick={() => setImgIdx(i => (i + 1) % property.images.length)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/70">
                     <ChevronRight className="h-5 w-5" />
                   </button>
                   <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
                     {property.images.map((_, i) => (
-                      <button
-                        key={i}
-                        onClick={() => setImgIdx(i)}
-                        className={cn('h-1.5 rounded-full transition-all', i === imgIdx ? 'w-4 bg-white' : 'w-1.5 bg-white/50')}
-                      />
+                      <button key={i} onClick={() => setImgIdx(i)} className={cn('h-1.5 rounded-full transition-all', i === imgIdx ? 'w-4 bg-white' : 'w-1.5 bg-white/50')} />
                     ))}
                   </div>
                 </>
@@ -122,22 +160,17 @@ export default function ListingDetail() {
               </div>
             </div>
 
-            {/* Thumbnail strip */}
             {property.images.length > 1 && (
               <div className="flex gap-3">
                 {property.images.map((img, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setImgIdx(i)}
-                    className={cn('h-16 w-24 rounded-xl overflow-hidden flex-shrink-0 border-2 transition-all', i === imgIdx ? 'border-gold' : 'border-transparent opacity-60 hover:opacity-80')}
-                  >
+                  <button key={i} onClick={() => setImgIdx(i)}
+                    className={cn('h-16 w-24 rounded-xl overflow-hidden flex-shrink-0 border-2 transition-all', i === imgIdx ? 'border-gold' : 'border-transparent opacity-60 hover:opacity-80')}>
                     <img src={img} alt="" className="w-full h-full object-cover" />
                   </button>
                 ))}
               </div>
             )}
 
-            {/* Header info */}
             <div>
               <div className="flex items-start justify-between gap-4 flex-wrap">
                 <div>
@@ -154,13 +187,12 @@ export default function ListingDetail() {
               </div>
             </div>
 
-            {/* Key specs */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[
                 { icon: Square, label: 'Area', value: `${property.area} ${property.areaUnit}` },
-                ...(property.bedrooms !== undefined ? [{ icon: Bed, label: 'Bedrooms', value: `${property.bedrooms} Beds` }] : []),
-                ...(property.bathrooms !== undefined ? [{ icon: Bath, label: 'Bathrooms', value: `${property.bathrooms} Baths` }] : []),
-                ...(property.parking !== undefined ? [{ icon: Car, label: 'Parking', value: `${property.parking} Cars` }] : []),
+                ...(property.bedrooms != null ? [{ icon: Bed, label: 'Bedrooms', value: `${property.bedrooms} Beds` }] : []),
+                ...(property.bathrooms != null ? [{ icon: Bath, label: 'Bathrooms', value: `${property.bathrooms} Baths` }] : []),
+                ...(property.parking != null ? [{ icon: Car, label: 'Parking', value: `${property.parking} Cars` }] : []),
               ].map((spec) => (
                 <div key={spec.label} className="bg-muted rounded-xl p-3 text-center">
                   <spec.icon className="h-5 w-5 text-gold mx-auto mb-1" />
@@ -170,26 +202,24 @@ export default function ListingDetail() {
               ))}
             </div>
 
-            {/* Description */}
             <div>
               <h2 className="font-display text-xl font-bold text-navy mb-3">Description</h2>
               <p className="text-muted-foreground leading-relaxed">{property.description}</p>
             </div>
 
-            {/* Features */}
-            <div>
-              <h2 className="font-display text-xl font-bold text-navy mb-3">Features & Amenities</h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {property.features.map((feature) => (
-                  <div key={feature} className="flex items-center gap-2 text-sm text-foreground">
-                    <CheckCircle className="h-4 w-4 text-success flex-shrink-0" />
-                    {feature}
-                  </div>
-                ))}
+            {property.features.length > 0 && (
+              <div>
+                <h2 className="font-display text-xl font-bold text-navy mb-3">Features & Amenities</h2>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {property.features.map((feature: string) => (
+                    <div key={feature} className="flex items-center gap-2 text-sm text-foreground">
+                      <CheckCircle className="h-4 w-4 text-success flex-shrink-0" /> {feature}
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
-            {/* Property details */}
             <div>
               <h2 className="font-display text-xl font-bold text-navy mb-3">Property Details</h2>
               <div className="grid grid-cols-2 gap-3">
@@ -198,7 +228,7 @@ export default function ListingDetail() {
                   { label: 'Purpose', value: property.purpose === 'buy' ? 'For Sale' : 'For Rent' },
                   { label: 'City', value: property.city },
                   { label: 'Area', value: property.location },
-                  ...(property.furnished !== undefined ? [{ label: 'Furnished', value: property.furnished ? 'Yes' : 'No' }] : []),
+                  ...(property.furnished != null ? [{ label: 'Furnished', value: property.furnished ? 'Yes' : 'No' }] : []),
                   { label: 'Listed', value: new Date(property.createdAt).toLocaleDateString('en-PK', { year: 'numeric', month: 'long', day: 'numeric' }) },
                 ].map((d) => (
                   <div key={d.label} className="flex justify-between py-2 border-b border-border text-sm">
@@ -210,71 +240,47 @@ export default function ListingDetail() {
             </div>
           </div>
 
-          {/* Right: Agent + Inquiry Form */}
+          {/* Right: Agent + Inquiry */}
           <div className="space-y-4">
-            {/* Agent Card */}
             <div className="bg-card rounded-2xl border border-border p-5 shadow-card sticky top-24">
               <div className="flex items-center gap-3 mb-4 pb-4 border-b border-border">
-                <div className="h-12 w-12 rounded-full bg-navy flex items-center justify-center text-primary-foreground text-lg font-bold">
-                  {property.agent.name.charAt(0)}
-                </div>
+                <div className="h-12 w-12 rounded-full bg-navy flex items-center justify-center text-primary-foreground text-lg font-bold">E</div>
                 <div>
-                  <p className="font-semibold text-foreground">{property.agent.name}</p>
-                  <p className="text-xs text-muted-foreground">Elite Properties Agent</p>
+                  <p className="font-semibold text-foreground">Estate Bnk Agent</p>
+                  <p className="text-xs text-muted-foreground">Estate Bnk Agent</p>
                   <Badge variant="secondary" className="text-xs mt-0.5">Verified ✓</Badge>
                 </div>
               </div>
 
               <div className="flex gap-3 mb-5">
-                <a href={`tel:${property.agent.phone}`} className="flex-1">
+                <a href="tel:+922135800000" className="flex-1">
                   <Button className="w-full bg-navy text-primary-foreground hover:bg-navy-light gap-2">
                     <Phone className="h-4 w-4" /> Call
                   </Button>
                 </a>
-                <Button
-                  className="flex-1 bg-[#25D366] hover:bg-[#20bd5a] text-white gap-2"
-                  onClick={handleWhatsApp}
-                >
+                <Button className="flex-1 bg-[#25D366] hover:bg-[#20bd5a] text-white gap-2" onClick={handleWhatsApp}>
                   <MessageCircle className="h-4 w-4" /> WhatsApp
                 </Button>
               </div>
 
-              {/* Inquiry Form */}
               {!submitted ? (
                 <form onSubmit={handleSubmit} className="space-y-3">
                   <p className="font-semibold text-sm text-foreground">Send an Inquiry</p>
                   <div>
                     <Label className="text-xs">Full Name</Label>
-                    <Input
-                      value={formData.name}
-                      onChange={(e) => setFormData(d => ({ ...d, name: e.target.value }))}
-                      placeholder="Muhammad Ali"
-                      className="mt-1 h-9 text-sm"
-                      required
-                    />
+                    <Input value={formData.name} onChange={e => setFormData(d => ({ ...d, name: e.target.value }))} placeholder="Muhammad Ali" className="mt-1 h-9 text-sm" required />
                   </div>
                   <div>
                     <Label className="text-xs">Mobile Number</Label>
-                    <Input
-                      value={formData.mobile}
-                      onChange={(e) => setFormData(d => ({ ...d, mobile: e.target.value }))}
-                      placeholder="+92-300-1234567"
-                      className="mt-1 h-9 text-sm"
-                      required
-                    />
+                    <Input value={formData.mobile} onChange={e => setFormData(d => ({ ...d, mobile: e.target.value }))} placeholder="+92-300-1234567" className="mt-1 h-9 text-sm" required />
                   </div>
                   <div>
                     <Label className="text-xs">Message</Label>
-                    <Textarea
-                      value={formData.message}
-                      onChange={(e) => setFormData(d => ({ ...d, message: e.target.value }))}
-                      placeholder="I'm interested in this property. Please contact me."
-                      className="mt-1 text-sm resize-none"
-                      rows={3}
-                    />
+                    <Textarea value={formData.message} onChange={e => setFormData(d => ({ ...d, message: e.target.value }))}
+                      placeholder="I'm interested in this property." className="mt-1 text-sm resize-none" rows={3} />
                   </div>
-                  <Button type="submit" className="w-full bg-gold text-navy-dark hover:bg-gold-light font-semibold shadow-gold">
-                    Send Inquiry
+                  <Button type="submit" disabled={submitting} className="w-full bg-gold text-navy-dark hover:bg-gold-light font-semibold shadow-gold">
+                    {submitting ? 'Sending...' : 'Send Inquiry'}
                   </Button>
                 </form>
               ) : (
@@ -288,12 +294,11 @@ export default function ListingDetail() {
           </div>
         </div>
 
-        {/* Similar Properties */}
         {similar.length > 0 && (
           <div className="mt-14">
             <h2 className="font-display text-2xl font-bold text-navy mb-6">Similar Properties</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {similar.map((p) => <PropertyCard key={p.id} property={p} />)}
+              {similar.map(p => <PropertyCard key={p.id} property={p as any} />)}
             </div>
           </div>
         )}
