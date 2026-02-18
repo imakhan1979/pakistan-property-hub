@@ -26,8 +26,8 @@ export default function AdminInventory() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [typeFilter, setTypeFilter] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
+  const [typeFilter, setTypeFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
 
   const fetchProperties = async () => {
     setLoading(true);
@@ -45,8 +45,8 @@ export default function AdminInventory() {
 
   const filtered = properties.filter(p => {
     const matchSearch = p.title.toLowerCase().includes(search.toLowerCase()) || p.location.toLowerCase().includes(search.toLowerCase());
-    const matchType = !typeFilter || p.type === typeFilter;
-    const matchStatus = !statusFilter || p.status === statusFilter;
+    const matchType = typeFilter === 'all' || p.type === typeFilter;
+    const matchStatus = statusFilter === 'all' || p.status === statusFilter;
     return matchSearch && matchType && matchStatus;
   });
 
@@ -88,7 +88,7 @@ export default function AdminInventory() {
             <Select value={typeFilter} onValueChange={setTypeFilter}>
               <SelectTrigger className="w-36"><SelectValue placeholder="All Types" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Types</SelectItem>
+                <SelectItem value="all">All Types</SelectItem>
                 {['house','apartment','office','plot'].map(t => (
                   <SelectItem key={t} value={t} className="capitalize">{t}</SelectItem>
                 ))}
@@ -97,7 +97,7 @@ export default function AdminInventory() {
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-36"><SelectValue placeholder="All Statuses" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Statuses</SelectItem>
+                <SelectItem value="all">All Statuses</SelectItem>
                 {['draft','review','published'].map(s => (
                   <SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>
                 ))}
