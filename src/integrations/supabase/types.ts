@@ -157,6 +157,119 @@ export type Database = {
           },
         ]
       }
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      properties: {
+        Row: {
+          agent_id: string | null
+          area: number
+          area_unit: string
+          bathrooms: number | null
+          bedrooms: number | null
+          block: string | null
+          city: string
+          created_at: string
+          description: string | null
+          featured: boolean | null
+          features: string[] | null
+          furnished: boolean | null
+          id: string
+          images: string[] | null
+          location: string
+          parking: number | null
+          price: number
+          price_label: string
+          purpose: string
+          status: string
+          title: string
+          type: string
+          updated_at: string
+          video_link: string | null
+          whatsapp: string | null
+        }
+        Insert: {
+          agent_id?: string | null
+          area: number
+          area_unit?: string
+          bathrooms?: number | null
+          bedrooms?: number | null
+          block?: string | null
+          city?: string
+          created_at?: string
+          description?: string | null
+          featured?: boolean | null
+          features?: string[] | null
+          furnished?: boolean | null
+          id?: string
+          images?: string[] | null
+          location: string
+          parking?: number | null
+          price: number
+          price_label: string
+          purpose: string
+          status?: string
+          title: string
+          type: string
+          updated_at?: string
+          video_link?: string | null
+          whatsapp?: string | null
+        }
+        Update: {
+          agent_id?: string | null
+          area?: number
+          area_unit?: string
+          bathrooms?: number | null
+          bedrooms?: number | null
+          block?: string | null
+          city?: string
+          created_at?: string
+          description?: string | null
+          featured?: boolean | null
+          features?: string[] | null
+          furnished?: boolean | null
+          id?: string
+          images?: string[] | null
+          location?: string
+          parking?: number | null
+          price?: number
+          price_label?: string
+          purpose?: string
+          status?: string
+          title?: string
+          type?: string
+          updated_at?: string
+          video_link?: string | null
+          whatsapp?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "properties_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           id: string

@@ -64,7 +64,7 @@ export default function About() {
         </div>
         <div className="container relative z-10 text-center">
           <p className="text-gold text-sm font-semibold uppercase tracking-widest mb-3">Est. 2008</p>
-          <h1 className="font-display text-4xl md:text-6xl font-bold text-white mb-4">Elite Properties</h1>
+          <h1 className="font-display text-4xl md:text-6xl font-bold text-white mb-4">Estate Bnk</h1>
           <p className="text-white/70 text-lg max-w-2xl mx-auto">Karachi's most trusted real estate company — building legacies, one property at a time.</p>
         </div>
       </div>
@@ -76,7 +76,7 @@ export default function About() {
             <p className="text-gold text-sm font-semibold uppercase tracking-widest mb-3">Our Story</p>
             <h2 className="font-display text-3xl md:text-4xl font-bold text-navy mb-5">A Legacy Built on Trust</h2>
             <div className="space-y-4 text-muted-foreground leading-relaxed">
-              <p>Elite Properties was founded in 2008 by Khalid Saeed with a singular vision: to bring professionalism, transparency, and genuine client service to Karachi's real estate market.</p>
+              <p>Estate Bnk was founded in 2008 by Khalid Saeed with a singular vision: to bring professionalism, transparency, and genuine client service to Karachi's real estate market.</p>
               <p>Starting with a small office in DHA Phase 5 and just five agents, we have grown into a team of over 50 professionals managing hundreds of residential and commercial listings across Karachi's most sought-after neighborhoods.</p>
               <p>Over 15 years and 1,200+ successful transactions later, we remain committed to the same values that our founder instilled from day one — integrity, expertise, and putting our clients first.</p>
             </div>

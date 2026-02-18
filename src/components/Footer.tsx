@@ -13,7 +13,7 @@ export default function Footer() {
                 <Building2 className="h-5 w-5 text-navy-dark" />
               </div>
               <div>
-                <p className="font-display font-bold text-white">Elite Properties</p>
+                <p className="font-display font-bold text-white">Estate Bnk</p>
                 <p className="text-[10px] tracking-widest text-gold uppercase">Karachi, Pakistan</p>
               </div>
             </div>
@@ -84,7 +84,7 @@ export default function Footer() {
               </li>
               <li className="flex items-center gap-2.5">
                 <Mail className="h-4 w-4 text-gold flex-shrink-0" />
-                <a href="mailto:info@eliteproperties.pk" className="text-sm text-white/60 hover:text-gold transition-colors">info@eliteproperties.pk</a>
+                <a href="mailto:info@estatebnk.pk" className="text-sm text-white/60 hover:text-gold transition-colors">info@estatebnk.pk</a>
               </li>
             </ul>
             <div className="mt-4 p-3 bg-white/5 rounded-xl text-xs text-white/50">
@@ -96,7 +96,7 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-white/10 mt-10 pt-6 flex flex-col sm:flex-row justify-between items-center gap-3">
-          <p className="text-xs text-white/40">© 2025 Elite Properties. All rights reserved. RERA Registered.</p>
+          <p className="text-xs text-white/40">© 2025 Estate Bnk. All rights reserved.</p>
           <div className="flex gap-4">
             <Link to="/privacy" className="text-xs text-white/40 hover:text-gold transition-colors">Privacy Policy</Link>
             <Link to="/terms" className="text-xs text-white/40 hover:text-gold transition-colors">Terms of Use</Link>

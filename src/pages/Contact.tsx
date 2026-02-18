@@ -182,7 +182,7 @@ export default function Contact() {
                   </div>
                   <h3 className="font-display text-2xl font-bold text-navy mb-2">Message Sent!</h3>
                   <p className="text-muted-foreground mb-6">
-                    Thank you for contacting Elite Properties. Our team will reach you at <strong>{form.mobile}</strong> within 30 minutes during business hours.
+                    Thank you for contacting Estate Bnk. Our team will reach you at <strong>{form.mobile}</strong> within 30 minutes during business hours.
                   </p>
                   <Button
                     variant="outline"

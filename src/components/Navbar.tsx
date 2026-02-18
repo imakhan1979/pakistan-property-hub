@@ -36,8 +36,8 @@ export default function Navbar() {
             <Building2 className="h-5 w-5 text-navy-dark" />
           </div>
           <div className="leading-tight">
-            <span className="block font-display text-base font-bold text-white">Elite</span>
-            <span className="block font-body text-[10px] font-medium tracking-widest text-gold uppercase">Properties</span>
+            <span className="block font-display text-base font-bold text-white">Estate</span>
+            <span className="block font-body text-[10px] font-medium tracking-widest text-gold uppercase">Bnk</span>
           </div>
         </Link>
 
